@@ -51,6 +51,13 @@ class Post(Base):
     def __str__(self):
         return f"Post(id={self.id}, created_by={self.created_by.user_name}, title={self.title}, message={self.message})"
 
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            title=self.title,
+            message=self.message
+        )
+
 
 class Like(Base):
     __tablename__ = 'likes'
@@ -78,6 +85,12 @@ class Comment(Base):
 
     def __str__(self):
         return repr(self)
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            message=self.message
+        )
 
 
 class Token(Base):

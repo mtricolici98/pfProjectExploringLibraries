@@ -7,6 +7,7 @@ def create_post(title, message, user):
     post = Post(title=title, message=message, created_by_id=user.id)
     session.add(post)
     session.commit()
+    session.refresh(post)
     return post
 
 
