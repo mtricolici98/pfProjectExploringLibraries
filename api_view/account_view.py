@@ -3,6 +3,7 @@ import json
 from flask import request, jsonify, make_response, Blueprint
 
 from service.user_service import create_user, login_user
+from utils.logger import logger, accounts_logger
 
 auth_view = Blueprint('auth', import_name=__name__)
 
@@ -18,6 +19,8 @@ def register():
         data = create_user(user_name, first_name, last_name, password)
         return 'Success', 200
     except Exception as ex:
+        accounts_logger.error(f'Failed to register with exception')
+        accounts_logger.exception(ex)
         return jsonify(str(ex)), 400
 
 

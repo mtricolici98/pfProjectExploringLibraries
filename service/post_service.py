@@ -1,5 +1,6 @@
 from db.database import Session
-from models.models import Post, User, Comment
+from models.models import Post, User, Comment, Like
+from utils.logger import logger
 
 
 def create_post(title, message, user):
@@ -42,6 +43,12 @@ def list_comments_on_post(post_id):
     return comments
 
 
+def get_likes_on_post(post_id):
+    session = Session()
+    likes = session.query(Like).join(Post).filter((Post.id == post_id)).all()
+    return likes
+
+
 def comments_on_post_by_user(post_id, user_id):
     session = Session()
     comments = session.query(Comment).join(Post).join(User).filter((Post.id == post_id) & (User.id == user_id)).all()
@@ -54,6 +61,17 @@ def add_comment_on_post(post_id, by_user_id, message):
             post_id=post_id,
             message=message,
             user_id=by_user_id
+        )
+        session.add(comment)
+        session.commit()
+
+
+def add_like_to_post(post_id, by_user_id):
+    with Session() as session:
+        logger.info(f'User {by_user_id} liked post {post_id}')
+        comment = Like(
+            post_id=post_id,
+            liked_by_id=by_user_id
         )
         session.add(comment)
         session.commit()

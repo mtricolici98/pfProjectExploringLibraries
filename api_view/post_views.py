@@ -1,7 +1,11 @@
-from api_view.utils import user_request
-from service.post_service import list_posts_for_user, create_post, list_posts_for_other, list_comments_on_post
-from flask import Blueprint, jsonify, request
 import json
+
+from flask import Blueprint, jsonify, request
+
+from api_view.utils import user_request
+from service.post_service import list_posts_for_user, create_post, list_posts_for_other, list_comments_on_post, \
+    add_comment_on_post, add_like_to_post
+from utils.logger import posts_logger
 
 post_views = Blueprint('posts', __name__)
 
@@ -38,12 +42,32 @@ def get_comments_for_post(user, post_id):
 
 @post_views.route('/posts/comments/<post_id>/add/', methods=['POST'])
 @user_request
-def add_comment_on_post(user, post_id):
-    # Post id is part of the URL
-    # For example sending request to localhost:8080/posts/comments/1/add/
-    # will add the comment to post with id 1
-    # TODO: Implement
-    pass
+def add_comment_on_post_view(user, post_id):
+    try:
+        data = request.json
+        add_comment_on_post(post_id, user.id, data.get('message'))
+        return 'Success', 200
+    except Exception as ex:
+        return 'Bad request', 400
+
+
+@post_views.route('/posts/<post_id>/like/add/', methods=['POST'])
+@user_request
+def add_like_to_post_view(user, post_id):
+    try:
+        add_like_to_post(post_id, user.id)
+        return 'Success', 200
+    except Exception as ex:
+        posts_logger.error(f'Request to like post {post_id} by user {user.id} failed with exception: {str(ex)}')
+        posts_logger.exception(ex)
+        return 'Bad request', 400
+
+
+@post_views.route('/posts/<post_id>/like/')
+@user_request
+def get_likes_on_post(user, post_id):
+    likes = get_likes_on_post(post_id)
+    return jsonify([comment.to_dict() for comment in likes])
 
 
 @post_views.route('/posts/add', methods=['POST'])

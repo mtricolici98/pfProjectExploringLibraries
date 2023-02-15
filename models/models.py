@@ -69,6 +69,12 @@ class Like(Base):
     liked_by_id = Column(Integer, ForeignKey('user.id'))
     liked_by = relationship("User", backref='likes')
 
+    def to_dict(self):
+        return dict(
+            post_id=self.post_id,
+            liked_by=self.liked_by.user_name
+        )
+
 
 class Comment(Base):
     __tablename__ = 'comment'
